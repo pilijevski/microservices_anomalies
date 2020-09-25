@@ -1,0 +1,226 @@
+version: '2'
+
+networks:
+  microservices-network:
+    external: true
+
+services:
+  front-end:
+    container_name: microservices_front-end
+    image: weaveworksdemos/front-end:0.3.12
+    hostname: front-end
+    restart: always
+    environment:
+        - ZIPKIN=http://zipkin.jaeger.svc.cluster.local:9411/api/v1/spans
+    cap_drop:
+      - ALL
+    networks:
+      - microservices-network
+
+  edge-router:
+    container_name: microservices_edge-router
+    image: weaveworksdemos/edge-router:0.1.1
+    ports:
+      - '80:80'
+      - '8080:8080'
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    networks:
+        - microservices-network
+    tmpfs:
+      - /var/run:rw,noexec,nosuid
+    hostname: edge-router
+    restart: always
+
+  catalogue:
+    container_name: microservices_catalogue
+    image: weaveworksdemos/catalogue:0.3.5
+    hostname: catalogue
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    networks:
+        - microservices-network
+
+  catalogue-db:
+    container_name: microservices_catalogue-db
+    image: weaveworksdemos/catalogue-db:0.3.0
+    hostname: catalogue-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_DATABASE=socksdb
+    networks:
+        - microservices-network
+
+  carts:
+    container_name: microservices_carts
+    image: weaveworksdemos/carts:0.4.8
+    hostname: carts
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom -Dspring.zipkin.enabled=false
+    networks:
+        - microservices-network
+  
+  carts-db:
+    container_name: microservices_carts-db
+    image: mongo:3.4
+    hostname: carts-db
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+    networks:
+      - microservices-network
+
+  orders:
+    container_name: microservices_orders
+    image: weaveworksdemos/orders:0.4.7
+    hostname: orders
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom -Dspring.zipkin.enabled=false
+    networks:
+      - microservices-network  
+
+  orders-db:
+    container_name: microservices_orders-db
+    image: mongo:3.4
+    hostname: orders-db
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+    networks:
+      - microservices-network
+
+  shipping:
+    container_name: microservices_shipping
+    image: weaveworksdemos/shipping:0.4.8
+    hostname: shipping
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom -Dspring.zipkin.enabled=false
+    networks:
+      - microservices-network
+
+  queue-master:
+    container_name: microservices_queue-master
+    image: weaveworksdemos/queue-master:0.3.1
+    hostname: queue-master
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+    networks:
+      - microservices-network
+      
+  rabbitmq:
+    container_name: microservices_rabbitmq
+    image: rabbitmq:3.6.8
+    hostname: rabbitmq
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    networks:
+      - microservices-network
+
+  payment:
+    container_name: microservices_payment
+    image: weaveworksdemos/payment:0.4.3
+    hostname: payment
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    networks:
+      - microservices-network
+    
+  user:
+    container_name: microservices_user
+    image: weaveworksdemos/user:0.4.4
+    hostname: user
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    environment:
+      - MONGO_HOST=user-db:27017
+    networks:
+      - microservices-network
+        
+  user-db:
+    container_name: microservices_user-db
+    image: weaveworksdemos/user-db:0.4.0
+    hostname: user-db
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+    networks:
+      - microservices-network
+      
+  user-sim:
+    container_name: microservices_user-sim
+    image: weaveworksdemos/load-test:0.1.1
+    cap_drop:
+      - ALL
+    hostname: user-simulator
+    command: "-d 1 -r 10 -c 10 -h edge-router"
+    networks:
+      - microservices-network

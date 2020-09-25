@@ -1,0 +1,10 @@
+{
+  "global_options": {
+    "duration": "2m",
+    "tc-image": "gaiadocker/iproute2"
+  },
+  "command_options": {
+      "time": "200"
+  },
+  "containers": "\"re2:microservices\""
+}
