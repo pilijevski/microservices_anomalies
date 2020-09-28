@@ -31,7 +31,7 @@ class Anomaly(Runnable):
 class PumbaAnomaly(Anomaly):
     def __init__(self, config, name=""):
         super().__init__(config, name)
-        self.pumba_anomaly = self.pumba_anomaly or "delay"
+        self.pumba_command = self.pumba_command or "delay"
         self.config = self.parse_config(config['config'])
         self._construct_exec_string()
 
@@ -39,7 +39,7 @@ class PumbaAnomaly(Anomaly):
         self.exec_string = " ".join(["pumba",
                                      "netem",
                                      self.config["global_options"],
-                                     self.pumba_anomaly,
+                                     self.pumba_command,
                                      self.config["command_options"],
                                      self.config["containers"]])
         print(self.exec_string)
@@ -49,7 +49,7 @@ class PumbaAnomaly(Anomaly):
         parsed_config = dict()
         for key, params in config.items():
             if type(params) == dict:
-                parsed_config[key] = " ".join(f"--{subkey} {subparam}" for subkey, subparam in params.items())
+                parsed_config[key] = " ".join(f"--{sub_key} {sub_param}" for sub_key, sub_param in params.items())
             else:
                 parsed_config[key] = params
         return parsed_config

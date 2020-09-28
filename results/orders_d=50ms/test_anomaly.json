@@ -4,13 +4,13 @@
     "delay": {
       "config": {
         "global_options": {
-          "duration": "1m",
+          "duration": "2m",
           "tc-image": "gaiadocker/iproute2"
         },
         "command_options": {
-          "time": "300"
+          "time": "50"
         },
-        "containers": "microservices_front-end microservices_edge-router"
+        "containers": "microservices_orders"
       },
       "timeout": "3m"
     }
@@ -33,7 +33,7 @@
   },
   "collectors": {
     "log_collector": {
-      "csv_path": "log_output.csv",
+      "csv_path": "log_output50.csv",
       "target_url": "http://localhost:9200"
     },
     "metric_collector": {
@@ -65,7 +65,7 @@
         "User Latency": "sum(rate(request_duration_seconds_sum{job=\"user\"}[10s])) / sum(rate(request_duration_seconds_count{job=\"user\"}[10s]))",
         "Frontend Latency": "sum(rate(request_duration_seconds_sum{job=\"frontend\"}[10s])) / sum(rate(request_duration_seconds_count{job=\"frontend\"}[10s]))"
       },
-      "csv_path": "metrics.csv"
+      "csv_path": "metrics50.csv"
     }
   }
 }

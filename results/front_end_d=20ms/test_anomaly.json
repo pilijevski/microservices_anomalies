@@ -1,0 +1,71 @@
+{
+  "duration": "15m",
+  "anomalies": {
+    "delay": {
+      "config": {
+        "global_options": {
+          "duration": "2m",
+          "tc-image": "gaiadocker/iproute2"
+        },
+        "command_options": {
+          "time": "20"
+        },
+        "containers": "microservices_front-end"
+      },
+      "timeout": "3m"
+    }
+  },
+  "user_sim": {
+    "name": "user_sim",
+    "timeout": "10s",
+    "config": {
+      "container_config": {
+        "hostname": "user-simulator",
+        "name": "user-sim"
+      },
+      "sim_config": {
+        "delay": "0",
+        "requests": "10",
+        "clients": "10",
+        "host": "edge-router"
+      }
+    }
+  },
+  "collectors": {
+    "log_collector": {
+      "csv_path": "log_output20.csv",
+      "target_url": "http://localhost:9200"
+    },
+    "metric_collector": {
+      "url": "http://localhost:9090",
+      "username": "admin",
+      "password": "foobar",
+      "duration": "10m",
+      "resolution": "1s",
+      "queries": {
+        "Shipping 200": "sum(rate(request_duration_seconds_count{job=\"shipping\",status_code=~\"2..\",route!=\"metrics\"}[1m])) * 100",
+        "Shipping 405": "sum(rate(request_duration_seconds_count{job=\"shipping\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+        "Catalogue 405": "sum(rate(request_duration_seconds_count{job=\"catalogue\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+        "Catalogue 200": "sum(rate(request_duration_seconds_count{job=\"catalogue\",status_code=~\"2..\",route!=\"metrics\"}[1m])) * 100",
+        "Cart 405":      "sum(rate(request_duration_seconds_count{job=\"cart\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+        "Cart 200":      "sum(rate(request_duration_seconds_count{job=\"cart\",status_code=~\"2..\",route!=\"metrics\"}[1m])) * 100",
+        "Orders 405": "sum(rate(request_duration_seconds_count{job=\"orders\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+        "Orders 200": "sum(rate(request_duration_seconds_count{job=\"orders\",status_code=~\"2..\",route!=\"metrics\"}[1m])) * 100",
+        "Payment 405": "sum(rate(request_duration_seconds_count{job=\"payment\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+        "Payment 200": "sum(rate(request_duration_seconds_count{job=\"payment\",status_code=~\"2..\",route!=\"metrics\"}[1m])) * 100",
+        "User 405": "sum(rate(request_duration_seconds_count{job=\"user\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+        "User 200": "sum(rate(request_duration_seconds_count{job=\"user\",status_code=~\"2..\",route!=\"metrics\"}[1m])) * 100",
+        "Frontend 405": "sum(rate(request_duration_seconds_count{job=\"frontend\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+        "Frontend 200": "sum(rate(request_duration_seconds_count{job=\"frontend\",status_code=~\"2..\",route!=\"metrics\"}[1m])) * 100",
+        "Catalogue Latency": "sum(rate(request_duration_seconds_sum{job=\"catalogue\"}[10s])) / sum(rate(request_duration_seconds_count{job=\"catalogue\"}[10s]))",
+        "Shipping Latency": "sum(rate(request_duration_seconds_sum{job=\"shipping\"}[10s])) / sum(rate(request_duration_seconds_count{job=\"shipping\"}[10s]))",
+        "Cart Latency": "sum(rate(request_duration_seconds_sum{job=\"cart\"}[10s])) / sum(rate(request_duration_seconds_count{job=\"cart\"}[10s]))",
+        "Orders Latency": "sum(rate(request_duration_seconds_sum{job=\"orders\"}[10s])) / sum(rate(request_duration_seconds_count{job=\"orders\"}[10s]))",
+        "Payment Latency": "sum(rate(request_duration_seconds_sum{job=\"payment\"}[10s])) / sum(rate(request_duration_seconds_count{job=\"payment\"}[10s]))",
+        "User Latency": "sum(rate(request_duration_seconds_sum{job=\"user\"}[10s])) / sum(rate(request_duration_seconds_count{job=\"user\"}[10s]))",
+        "Frontend Latency": "sum(rate(request_duration_seconds_sum{job=\"frontend\"}[10s])) / sum(rate(request_duration_seconds_count{job=\"frontend\"}[10s]))"
+      },
+      "csv_path": "metrics20.csv"
+    }
+  }
+}
