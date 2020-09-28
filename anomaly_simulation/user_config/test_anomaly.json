@@ -6,7 +6,7 @@
         "global_options": {
         },
         "command_options": {
-          "duration": "1m"
+          "duration": "2m"
         },
         "containers": "microservices_orders microservices_front-end"
       },

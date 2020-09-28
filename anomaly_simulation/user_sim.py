@@ -15,7 +15,6 @@ class UserSim(Runnable):
         return "docker run " \
                "--rm -d --network microservices-network " \
                f"--hostname {self.cconfig.hostname} " \
-               f"--name {self.cconfig.name} " \
                f"weaveworksdemos/load-test:0.1.1 " \
                f"-d {self.simconfig.delay} -r {self.simconfig.requests} " \
                f"-c {self.simconfig.clients} -h {self.simconfig.host}"
